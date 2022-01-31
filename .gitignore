@@ -127,3 +127,6 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Copy from sample_config.py and modify, but don't checkin to source
+config.py

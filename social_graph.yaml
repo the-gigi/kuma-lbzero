@@ -1,0 +1,106 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: delinkcious
+  annotations:
+      kuma.io/sidecar-injection: enabled
+      kuma.io/mesh: default
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: social-graph-db
+  namespace: delinkcious
+  labels:
+    svc: social-graph
+    app: postgres
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      svc: social-graph
+      app: postgres
+  template:
+    metadata:
+      labels:
+        svc: social-graph
+        app: postgres
+        kuma.io/sidecar-injection: disabled
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:11.1-alpine
+        ports:
+        - containerPort: 5432
+        env:
+        - name: POSTGRES_DB
+          value: social_graph_manager
+        - name: POSTGRES_USER
+          value: postgres
+        - name: POSTGRES_PASSWORD
+          value: postgres
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: social-graph-db
+  namespace: delinkcious
+spec:
+  ports:
+  - port: 5432
+  selector:
+    svc: social-graph
+    app: postgres
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: social-graph-manager-config
+  namespace: delinkcious
+data:
+  DELINKCIOUS_MUTUAL_AUTH: "false"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: social-graph-manager
+  namespace: delinkcious
+  labels:
+    svc: social-graph
+    app: manager
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      svc: social-graph
+      app: manager
+  template:
+    metadata:
+      labels:
+        svc: social-graph
+        app: manager
+    spec:
+      containers:
+      - name: social-graph-manager
+        image: g1g1/delinkcious-social-graph:0.3
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 9090
+        envFrom:
+        - configMapRef:
+            name: social-graph-manager-config
+        resources:
+          requests:
+            cpu: 100m
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: social-graph-manager
+  namespace: delinkcious
+spec:
+  ports:
+  - port: 9090
+  selector:
+    svc: social-graph
+    app: manager

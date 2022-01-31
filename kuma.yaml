@@ -1,0 +1,1334 @@
+
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: kuma-system
+  labels:
+    kuma.io/system-namespace: "true"
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: kuma-control-plane
+  namespace: kuma-system
+  labels:
+    app.kubernetes.io/name: kuma
+    app.kubernetes.io/instance: kuma
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: kuma-ingress
+  namespace: kuma-system
+  labels:
+    app.kubernetes.io/name: kuma
+    app.kubernetes.io/instance: kuma
+---
+apiVersion: v1
+kind: Secret
+type: kubernetes.io/tls
+metadata:
+  name: kuma-tls-cert
+  namespace: kuma-system
+  labels:
+    app.kubernetes.io/name: kuma
+    app.kubernetes.io/instance: kuma
+data:
+  tls.crt: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURhakNDQWxLZ0F3SUJBZ0lRZko0RTVPc3FoajM5eHltZmd5UXpqVEFOQmdrcWhraUc5dzBCQVFzRkFEQVMKTVJBd0RnWURWUVFERXdkcmRXMWhMV05oTUI0WERUSXlNREV5T1RJek1qQXlOMW9YRFRNeU1ERXlOekl6TWpBeQpOMW93SFRFYk1Ca0dBMVVFQXhNU2EzVnRZUzFqYjI1MGNtOXNMWEJzWVc1bE1JSUJJakFOQmdrcWhraUc5dzBCCkFRRUZBQU9DQVE4QU1JSUJDZ0tDQVFFQTYvTi9QS3JyT0FVVEpvSWdTUmZzVUhoOGMvcFJPTjlwbSt4YVlGVVoKL1gyQ1F4QWMrUGpNNVFPL09kRGlmd0RiSHZ3MEVPWU13eWk5RW8wZWcwNmZOSCsxLzBJK1B6SGVIVXFKNE5ncQpOaE1xMDlGeHprU3NLZmpYY3ZOS1hvL2lXeTJrZGJHalVoMjBPdm9ScWhVVWdIZDJEcjd2Y0VHd2d4ME0xOHRLCkZJV1NaZGYzVXhMNEFWbWV5c2FuUnRBSGs4TmZSYkU0a0JvdXBhQ0MvWTEwb3NYWGJFdCtPZWg0V1B3M1A0bnoKek03VmhBNVJjdEFnQUlqMkxYWTd6cHFVdWhqMmp1WmY2aTZ2eGVBb2x4bjhFbWp4QTZHNElzR2ZQc2c1RDJRSwpvTFBDMDlpQW95UzJYc2Erbk9ac1V1Z1kxV3NmUGJGeTY0N1o4aDBucnA4aTJ3SURBUUFCbzRHd01JR3RNQTRHCkExVWREd0VCL3dRRUF3SUZvREFkQmdOVkhTVUVGakFVQmdnckJnRUZCUWNEQVFZSUt3WUJCUVVIQXdJd0RBWUQKVlIwVEFRSC9CQUl3QURBZkJnTlZIU01FR0RBV2dCU3ZlVVFoV2hhdUI0UGUxQ3UvVTFlRDdZL3NQakJOQmdOVgpIUkVFUmpCRWdoNXJkVzFoTFdOdmJuUnliMnd0Y0d4aGJtVXVhM1Z0WVMxemVYTjBaVzJDSW10MWJXRXRZMjl1CmRISnZiQzF3YkdGdVpTNXJkVzFoTFhONWMzUmxiUzV6ZG1Nd0RRWUpLb1pJaHZjTkFRRUxCUUFEZ2dFQkFEdEkKT0hqZXNsUUcyVk9vaERlQlh4UW5nT2ZMNE5NaXdoRVpPL3J0WldORG9SY2N3dW9SdmpTcnh0V2NlLzhCYjdMYQpsaEoxTEpOVU45NGllSnFycys1TjJIVzVzM1F5OXhxZnNFSGhsQWJrbGFRY2t3eWQybHUrc1FKOVNuc3JjUTV6CmFaVjJBb3RWS0o5cFZzVWJqbVg2RlhBbnZPYVFMWi93QXdBZHhPdno4MWtFNm81dllMSWYwcVB2eWFSQldHYU8KL05kK1BLT2FDMmVkQXBmdVhHeTJvU2dmd3RUZkZkV3Z0UGRDcWlMYzlOd1ZKMHJ2RTBjQ2lxbE1ISkpsNGMyQwo5NTBvdW1vVWZCTUZsQVZnYWRHVXI2VTRsQzQzOFlxWm9LeGxIM3VPeUlZSU9oV1BtVm0xblYydWlxS05XdlUyCnJLcG1LaEpuK0lrOERpb0R1Nkk9Ci0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K
+  tls.key: LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlFb2dJQkFBS0NBUUVBNi9OL1BLcnJPQVVUSm9JZ1NSZnNVSGg4Yy9wUk9OOXBtK3hhWUZVWi9YMkNReEFjCitQak01UU8vT2REaWZ3RGJIdncwRU9ZTXd5aTlFbzBlZzA2Zk5IKzEvMEkrUHpIZUhVcUo0TmdxTmhNcTA5RngKemtTc0tmalhjdk5LWG8vaVd5MmtkYkdqVWgyME92b1JxaFVVZ0hkMkRyN3ZjRUd3Z3gwTTE4dEtGSVdTWmRmMwpVeEw0QVZtZXlzYW5SdEFIazhOZlJiRTRrQm91cGFDQy9ZMTBvc1hYYkV0K09laDRXUHczUDRuenpNN1ZoQTVSCmN0QWdBSWoyTFhZN3pwcVV1aGoyanVaZjZpNnZ4ZUFvbHhuOEVtanhBNkc0SXNHZlBzZzVEMlFLb0xQQzA5aUEKb3lTMlhzYStuT1pzVXVnWTFXc2ZQYkZ5NjQ3WjhoMG5ycDhpMndJREFRQUJBb0lCQUhhM0p0ZVJiNVBhQ2M2ZwpQanBJalIvWDMxWkRKY2Fsc2U4L3RpRXQ4RXU0Y0dmcG5Zb3ZOSGd0c0hNWWhEMCtZd0Z1QjR4UkV5N0dPb3N3CjhaOURXWnNDZnNHVnhOZnE4VVJ2a252TWgwQjUyRnlHenVublozQWV3ZGdXVE43VEtpS1NEbU1oSTNsWGRLMFAKMFA5d1o4WlRWTlVLZ0ZKTTJ0QzlOdzhFTzV1aXVhQ1VJMGh4bU9ZQlNIWFdSZWVwMmVNVnZFSmZBalNjVWRFSAowOFc4Y3YvNURjSVlPQnNWbTBRUkNQU0dUb01uR0FtVlE5RGt1NDZpb2NyUFJaVFF3TG9RTm9YS21ScmtXcEhWClNINjVTeVI5Y2NMOGc1U1AyUFh1bm80ZnpuNWoxZFROci80eTlacmhFVnFPam84QSsrR3RkaWlkdTdYeVNNUnkKOEpkL1ZHRUNnWUVBN3NUZTd5azFablNrdEJ1T2x2REs1cFdqTGl4TFZEMVhzUFE4SEE4b0s1QWxwUUxvWE51ZAplMWRmOVhkRmZCdHZOV1ZscUJOck03ZktZWWJBaFdmVklrZzlVeXZyM25GNS96Vmx5RDNYU1dWRy9oMG1nS0NQCkNzcWNtdmdhMFBYb05JcjJpTm1UbTRYOWtaVFV0QVkvWndQU3d2djBKK0g3Sm5GR0NJT3dzYWtDZ1lFQS9QcVIKVDE0YnV0TVRUZGxpdkMyV3I2S3dHczBTTWQ2NE1XbDA0c3ZzVWtiMzJlR1J3ZTFKYnM4YzdLb2ljR0kzemRPKwpuenRsd2duL0w5SVp3SjRucFZKWWVVNnc2aDFRMmxEbytiSnpsRVo5OWxBZ3BDVTFZT2VTdXlzQXhRb1poRitPCmNKOVRMdVRZYkFkdTdCSTNxZlRzMEtvOVZGTkZISTVPQ2JTWkN1TUNnWUJtWWhqT0tMZHpOWFVpbmVab3B0djYKUUJQMnlwdUtoYnRDYjVnTzJCajdoUlgvU2QzbFkyNkY0eE9NcUJZdGYzNFNRV1p6eWMvZ0gyRXlySnVGR043MQprbEJwaDUzZWhuNHZodkFjQ3hoenFtL2txdzlGZkpPWnB3TzhGOE0zOHhvYzNiR1ZRT2JnZTNZZHBOb0lUOTJFCkNNbXBQbXlWWlh0U0lxUkxKbHp2OFFLQmdHaFVuaUR4V3RaTnZxUllodE84cVd4OTE4cjEwQThwSHlXaHJFYnMKZXVYanhzdmdyMUFmSUMzRzFOTDF4NFk1dTNIelphWWR4UFdsVWN6VEJUUGZCZEswaHpCZ042NFZzUWFZWDd5Ngp6OWZTeXBnT3E2ZUdnT0VhSC9WNDRyUmdXZTJ4eXZpL2ZIcldmanJ2UmR1dUY2N01CKzUyaHh5RHl2amY1MmN4ClIveXBBb0dBU2Y2YjRKOGpiNlJPV2FpTWppVy9OajFXM3ROdzN4eVFUSGhEY2oxRFNENE41RWhYRGN4bURtaDkKbXB5bFNEb0kvRFcyckE4VmZEekg3RERsb3JON0VtbG90SWY0M0d2bTZiV1ZiQzNPL21TUUl3WFJna1Fiak5tTQovRmlNMFc2b1ZvbnZVMEVQL1hvQlJSM2x5dm9QaGk0MmRWSWhyU0U5b042bk4wY3gzSVk9Ci0tLS0tRU5EIFJTQSBQUklWQVRFIEtFWS0tLS0tCg==
+  ca.crt: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUREekNDQWZlZ0F3SUJBZ0lRRklsR2N3OHBLMDQyWktPMUFYdWFXakFOQmdrcWhraUc5dzBCQVFzRkFEQVMKTVJBd0RnWURWUVFERXdkcmRXMWhMV05oTUI0WERUSXlNREV5T1RJek1qQXlOMW9YRFRNeU1ERXlOekl6TWpBeQpOMW93RWpFUU1BNEdBMVVFQXhNSGEzVnRZUzFqWVRDQ0FTSXdEUVlKS29aSWh2Y05BUUVCQlFBRGdnRVBBRENDCkFRb0NnZ0VCQU1KZElWelhtSDk5SGt0ZDZtYkVnS3FhM3NVOVR6RnFkSkVsYkFlUW9UZERlRmJZT2lpOWxJUE8KYm82TXhYaGpBSUN2NGJZMlJpeDVsZ29XSXQ2UHVDRVhaWUFvdDA4RGo5amVQN096WlAxWGliOEdxQnBldUl6dwpYYWc2MFNMTVNoUDFnSFlyOFd3bzBhaDZKTmRsaXN2VjVMQXljbDFwMWJOc1g2N0ROMTl2MkxGVURncTFmbW5yCjZxT2xhMmhoaUVrWmJjY1Z2TGQ4ODN1YlFrMFYzTTMvQkFmMnFlR1hBOGhad1V2L2M0OTBuTGZDUmQ3eWREa1cKU0pWQnUwQkoxd3BVWkVFTTIvYk1VVHNINW8vejBQOFhhYlc2cWJoYWxrais2T2xOd3Y4ZE5CNlUzMzR3a3EvdgpnS1NEZHFZOGtYQmN6cVprT3JnSnRTanU5NStIb0MwQ0F3RUFBYU5oTUY4d0RnWURWUjBQQVFIL0JBUURBZ0trCk1CMEdBMVVkSlFRV01CUUdDQ3NHQVFVRkJ3TUJCZ2dyQmdFRkJRY0RBakFQQmdOVkhSTUJBZjhFQlRBREFRSC8KTUIwR0ExVWREZ1FXQkJTdmVVUWhXaGF1QjRQZTFDdS9VMWVEN1kvc1BqQU5CZ2txaGtpRzl3MEJBUXNGQUFPQwpBUUVBd2loUkxhL1hDV2VxZVlhRlMvd3AyTllkSzNIK2M3bkl1aUVPTW11enJkY00xQk9sTlJwM21uSEhhdGV2ClhTWnZCVXc5K1NVYmpJQXNHNGxCcnR3WHZMV3ZlK1dabW4rRDlraUs5bjE5Q2ZGclVTOWIzN1VabkVqZ3F0TXAKaEN2SVpPTlZNREZqd01DVGIycXM1TzczL2VlNWRIYThoZEJwNTBXUVhSMjc0TGJMZE5vNTdoSmhuclpFZXVGVQo5eXhha2NxUEhDUURPaVhnSGRtcHo2WXFzUDZnb1l4c0VaSGM4d3luQWxlQ3RoNjZnS3pkU3RkYjdlRU94Mk9QCi9rQ0hjWEQ4bkRZUmFOMm80KzNsKzRqOGJ2djREa0xxTTlhY0M4QTExTnRaRTRVM256ajlKVWRHbG5EUmgvYmMKdlMrWnRPeTYwb3hZb08wNHoySkhCcmNZVEE9PQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg==
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kuma-control-plane-config
+  namespace: kuma-system
+  labels:
+    app.kubernetes.io/name: kuma
+    app.kubernetes.io/instance: kuma
+data:
+  config.yaml: |
+    # use this file to override default configuration of `kuma-cp`
+    #
+    # see conf/kuma-cp.conf.yml for available settings
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  creationTimestamp: null
+  name: circuitbreakers.kuma.io
+spec:
+  group: kuma.io
+  names:
+    kind: CircuitBreaker
+    plural: circuitbreakers
+  scope: Cluster
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          description: CircuitBreaker is the Schema for the circuitbreaker API
+          properties:
+            mesh:
+              type: string
+            spec:
+              x-kubernetes-preserve-unknown-fields: true
+              type: object
+          type: object
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  creationTimestamp: null
+  name: dataplanes.kuma.io
+spec:
+  group: kuma.io
+  names:
+    kind: Dataplane
+    plural: dataplanes
+  scope: Namespaced
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          description: Dataplane is the Schema for the dataplanes API
+          properties:
+            mesh:
+              type: string
+            spec:
+              x-kubernetes-preserve-unknown-fields: true
+              type: object
+          type: object
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  creationTimestamp: null
+  name: retries.kuma.io
+spec:
+  group: kuma.io
+  names:
+    kind: Retry
+    plural: retries
+  scope: Cluster
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          description: Retry is the Schema for the retries API
+          properties:
+            mesh:
+              type: string
+            spec:
+              x-kubernetes-preserve-unknown-fields: true
+              type: object
+          type: object
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  creationTimestamp: null
+  name: serviceinsights.kuma.io
+spec:
+  group: kuma.io
+  names:
+    kind: ServiceInsight
+    plural: serviceinsights
+  scope: Cluster
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          description: ServiceInsight is the Schema for the services insights API
+          properties:
+            mesh:
+              type: string
+            spec:
+              x-kubernetes-preserve-unknown-fields: true
+              type: object
+          type: object
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  creationTimestamp: null
+  name: timeouts.kuma.io
+spec:
+  group: kuma.io
+  names:
+    kind: Timeout
+    plural: timeouts
+  scope: Cluster
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          description: Timeout is the Schema for the timeout API
+          properties:
+            mesh:
+              type: string
+            spec:
+              x-kubernetes-preserve-unknown-fields: true
+              type: object
+          type: object
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  creationTimestamp: null
+  name: trafficlogs.kuma.io
+spec:
+  group: kuma.io
+  names:
+    kind: TrafficLog
+    plural: trafficlogs
+  scope: Cluster
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          description: TrafficLog is the Schema for the trafficlogs API
+          properties:
+            mesh:
+              type: string
+            spec:
+              x-kubernetes-preserve-unknown-fields: true
+              type: object
+          type: object
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  creationTimestamp: null
+  name: trafficpermissions.kuma.io
+spec:
+  group: kuma.io
+  names:
+    kind: TrafficPermission
+    plural: trafficpermissions
+  scope: Cluster
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          description: TrafficPermission is the Schema for the trafficpermissions API
+          properties:
+            mesh:
+              type: string
+            spec:
+              x-kubernetes-preserve-unknown-fields: true
+              type: object
+          type: object
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  creationTimestamp: null
+  name: trafficroutes.kuma.io
+spec:
+  group: kuma.io
+  names:
+    kind: TrafficRoute
+    plural: trafficroutes
+  scope: Cluster
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          description: TrafficRoute is the Schema for the trafficroutes API
+          properties:
+            mesh:
+              type: string
+            spec:
+              x-kubernetes-preserve-unknown-fields: true
+              type: object
+          type: object
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  creationTimestamp: null
+  name: traffictraces.kuma.io
+spec:
+  group: kuma.io
+  names:
+    kind: TrafficTrace
+    plural: traffictraces
+  scope: Cluster
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          description: TrafficTrace is the Schema for the traffictraces API
+          properties:
+            mesh:
+              type: string
+            spec:
+              x-kubernetes-preserve-unknown-fields: true
+              type: object
+          type: object
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  creationTimestamp: null
+  name: virtualoutbounds.kuma.io
+spec:
+  group: kuma.io
+  names:
+    kind: VirtualOutbound
+    plural: virtualoutbounds
+  scope: Cluster
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          description: VirtualOutbound is the Schema for the virtualoutbounds API
+          properties:
+            mesh:
+              type: string
+            spec:
+              x-kubernetes-preserve-unknown-fields: true
+              type: object
+          type: object
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  creationTimestamp: null
+  name: zoneingressinsights.kuma.io
+spec:
+  group: kuma.io
+  names:
+    kind: ZoneIngressInsight
+    plural: zoneingressinsights
+  scope: Namespaced
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          description: ZoneIngressInsight is the Schema for the zone ingress insight API
+          properties:
+            mesh:
+              type: string
+            spec:
+              x-kubernetes-preserve-unknown-fields: true
+              type: object
+          type: object
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  creationTimestamp: null
+  name: zoneinsights.kuma.io
+spec:
+  group: kuma.io
+  names:
+    kind: ZoneInsight
+    plural: zoneinsights
+  scope: Cluster
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          description: ZoneInsight is the Schema for the zone insight API
+          properties:
+            mesh:
+              type: string
+            spec:
+              x-kubernetes-preserve-unknown-fields: true
+              type: object
+          type: object
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  creationTimestamp: null
+  name: dataplaneinsights.kuma.io
+spec:
+  group: kuma.io
+  names:
+    kind: DataplaneInsight
+    plural: dataplaneinsights
+  scope: Namespaced
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          description: DataplaneInsight is the Schema for the dataplane insights API
+          properties:
+            mesh:
+              type: string
+            status:
+              x-kubernetes-preserve-unknown-fields: true
+              type: object
+          type: object
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  creationTimestamp: null
+  name: zones.kuma.io
+spec:
+  group: kuma.io
+  names:
+    kind: Zone
+    plural: zones
+  scope: Cluster
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          description: Zone is the Schema for the zone API
+          properties:
+            mesh:
+              type: string
+            spec:
+              x-kubernetes-preserve-unknown-fields: true
+              type: object
+          type: object
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  creationTimestamp: null
+  name: zoneingresses.kuma.io
+spec:
+  group: kuma.io
+  names:
+    kind: ZoneIngress
+    plural: zoneingresses
+  scope: Namespaced
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          description: ZoneIngress is the Schema for the zone ingress API
+          properties:
+            mesh:
+              type: string
+            spec:
+              x-kubernetes-preserve-unknown-fields: true
+              type: object
+          type: object
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  creationTimestamp: null
+  name: externalservices.kuma.io
+spec:
+  group: kuma.io
+  names:
+    kind: ExternalService
+    plural: externalservices
+  scope: Cluster
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          properties:
+            mesh:
+              type: string
+            spec:
+              x-kubernetes-preserve-unknown-fields: true
+              type: object
+          type: object
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  creationTimestamp: null
+  name: faultinjections.kuma.io
+spec:
+  group: kuma.io
+  names:
+    kind: FaultInjection
+    plural: faultinjections
+  scope: Cluster
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          description: FaultInjection is the Schema for the faultinjections API
+          properties:
+            mesh:
+              type: string
+            spec:
+              x-kubernetes-preserve-unknown-fields: true
+              type: object
+          type: object
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  creationTimestamp: null
+  name: healthchecks.kuma.io
+spec:
+  group: kuma.io
+  names:
+    kind: HealthCheck
+    plural: healthchecks
+  scope: Cluster
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          description: HealthCheck is the Schema for the healthchecks API
+          properties:
+            mesh:
+              type: string
+            spec:
+              x-kubernetes-preserve-unknown-fields: true
+              type: object
+          type: object
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  creationTimestamp: null
+  name: meshinsights.kuma.io
+spec:
+  group: kuma.io
+  names:
+    kind: MeshInsight
+    plural: meshinsights
+  scope: Cluster
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          description: MeshInsight is the Schema for the meshes insights API
+          properties:
+            mesh:
+              type: string
+            spec:
+              x-kubernetes-preserve-unknown-fields: true
+              type: object
+          type: object
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  creationTimestamp: null
+  name: meshes.kuma.io
+spec:
+  group: kuma.io
+  names:
+    kind: Mesh
+    plural: meshes
+  scope: Cluster
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          description: Mesh is the Schema for the meshes API
+          properties:
+            spec:
+              x-kubernetes-preserve-unknown-fields: true
+              type: object
+          type: object
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  creationTimestamp: null
+  name: proxytemplates.kuma.io
+spec:
+  group: kuma.io
+  names:
+    kind: ProxyTemplate
+    plural: proxytemplates
+  scope: Cluster
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          description: ProxyTemplate is the Schema for the proxytemplates API
+          properties:
+            mesh:
+              type: string
+            spec:
+              x-kubernetes-preserve-unknown-fields: true
+              type: object
+          type: object
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  creationTimestamp: null
+  name: ratelimits.kuma.io
+spec:
+  group: kuma.io
+  names:
+    kind: RateLimit
+    plural: ratelimits
+  scope: Cluster
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          description: RateLimit is the Schema for the ratelimits API
+          properties:
+            mesh:
+              type: string
+            spec:
+              x-kubernetes-preserve-unknown-fields: true
+              type: object
+          type: object
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: kuma-control-plane
+  labels:
+    app.kubernetes.io/name: kuma
+    app.kubernetes.io/instance: kuma
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - namespaces
+      - pods
+      - configmaps
+      - nodes
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - coordination.k8s.io
+    resources:
+      - leases
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - update
+      - patch
+      - delete
+  - apiGroups:
+      - ""
+    resources:
+      - events
+    verbs:
+      - create
+      - patch
+  - apiGroups:
+      - ""
+    resources:
+      - services
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - update
+      - patch
+  - apiGroups:
+      - ""
+    resources:
+      - events
+    verbs:
+      - create
+      - patch
+  - apiGroups:
+      - kuma.io
+    resources:
+      - dataplanes
+      - dataplaneinsights
+      - meshes
+      - zones
+      - zoneinsights
+      - zoneingresses
+      - zoneingressinsights
+      - meshinsights
+      - serviceinsights
+      - proxytemplates
+      - ratelimits
+      - trafficpermissions
+      - trafficroutes
+      - timeouts
+      - retries
+      - circuitbreakers
+      - virtualoutbounds
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - update
+      - patch
+      - delete
+  - apiGroups:
+      - kuma.io
+    resources:
+      - externalservices
+      - faultinjections
+      - healthchecks
+      - trafficlogs
+      - traffictraces
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - update
+      - patch
+      - delete
+  - apiGroups:
+      - ""
+    resources:
+      - pods/finalizers
+    verbs:
+      - "*"
+  - apiGroups:
+      - kuma.io
+    resources:
+      - meshes/finalizers
+    verbs:
+      - "*"
+  - apiGroups:
+      - kuma.io
+    resources:
+      - dataplanes/finalizers
+    verbs:
+      - "*"
+  # validate k8s token before issuing mTLS cert
+  - apiGroups:
+      - authentication.k8s.io
+    resources:
+      - tokenreviews
+    verbs:
+      - create
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: kuma-control-plane
+  labels:
+    app.kubernetes.io/name: kuma
+    app.kubernetes.io/instance: kuma
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: kuma-control-plane
+subjects:
+  - kind: ServiceAccount
+    name: kuma-control-plane
+    namespace: kuma-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: kuma-control-plane
+  namespace: kuma-system
+  labels:
+    app.kubernetes.io/name: kuma
+    app.kubernetes.io/instance: kuma
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - secrets
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - update
+      - patch
+      - delete
+  - apiGroups:
+      - ""
+    resources:
+      - configmaps
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - update
+      - patch
+      - delete
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: kuma-control-plane
+  namespace: kuma-system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: kuma-control-plane
+subjects:
+  - kind: ServiceAccount
+    name: kuma-control-plane
+    namespace: kuma-system
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kuma-control-plane
+  namespace: kuma-system
+  labels:
+    app.kubernetes.io/name: kuma
+    app.kubernetes.io/instance: kuma
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "5680"
+spec:
+  type: ClusterIP
+  ports:
+    - port: 5681
+      name: http-api-server
+    - port: 5682
+      name: https-api-server
+    - port: 443
+      name: https-admission-server
+      targetPort: 5443
+    - port: 5676
+      name: mads-server
+    - port: 5678
+      name: dp-server
+    - port: 5653
+      name: dns-server
+      protocol: UDP
+  selector:
+    app: kuma-control-plane
+    app.kubernetes.io/name: kuma
+    app.kubernetes.io/instance: kuma
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kuma-ingress
+  namespace: kuma-system
+  labels:
+    app.kubernetes.io/name: kuma
+    app.kubernetes.io/instance: kuma
+  annotations:
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 10001
+      protocol: TCP
+      targetPort: 10001
+  selector:
+    app: kuma-ingress
+    app.kubernetes.io/name: kuma
+    app.kubernetes.io/instance: kuma
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kuma-control-plane
+  namespace: kuma-system
+  labels:
+    app.kubernetes.io/name: kuma
+    app.kubernetes.io/instance: kuma
+    app: kuma-control-plane
+spec:
+  replicas: 1
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: kuma
+      app.kubernetes.io/instance: kuma
+      app: kuma-control-plane
+  template:
+    metadata:
+      annotations:
+        checksum/config: 1458b4c23aeef8ef647bc61e48108682315cc7a51ceebdcc7a2f3b0b70923dc1
+        checksum/tls-secrets: 37c94f0cdc540acc885db918852a044be1179be39412f43a3b997632c66259a0
+      labels:
+        app.kubernetes.io/name: kuma
+        app.kubernetes.io/instance: kuma
+        app: kuma-control-plane
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - kuma-control-plane
+              topologyKey: kubernetes.io/hostname
+      serviceAccountName: kuma-control-plane
+      nodeSelector:
+        
+        kubernetes.io/arch: amd64
+        kubernetes.io/os: linux
+      containers:
+        - name: control-plane
+          image: "docker.io/kumahq/kuma-cp:1.4.1"
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: KUMA_API_SERVER_AUTHN_LOCALHOST_IS_ADMIN
+              value: "false"
+            - name: KUMA_API_SERVER_READ_ONLY
+              value: "true"
+            - name: KUMA_DEFAULTS_SKIP_MESH_CREATION
+              value: "false"
+            - name: KUMA_DP_SERVER_HDS_ENABLED
+              value: "false"
+            - name: KUMA_ENVIRONMENT
+              value: "kubernetes"
+            - name: KUMA_GENERAL_TLS_CERT_FILE
+              value: "/var/run/secrets/kuma.io/tls-cert/tls.crt"
+            - name: KUMA_GENERAL_TLS_KEY_FILE
+              value: "/var/run/secrets/kuma.io/tls-cert/tls.key"
+            - name: KUMA_INJECTOR_INIT_CONTAINER_IMAGE
+              value: "docker.io/kumahq/kuma-init:1.4.1"
+            - name: KUMA_MODE
+              value: "zone"
+            - name: KUMA_MULTIZONE_ZONE_GLOBAL_ADDRESS
+              value: "grpcs://host.k3d.internal:5681"
+            - name: KUMA_MULTIZONE_ZONE_NAME
+              value: "remote-cluster-1"
+            - name: KUMA_RUNTIME_KUBERNETES_ADMISSION_SERVER_CERT_DIR
+              value: "/var/run/secrets/kuma.io/tls-cert"
+            - name: KUMA_RUNTIME_KUBERNETES_ADMISSION_SERVER_PORT
+              value: "5443"
+            - name: KUMA_RUNTIME_KUBERNETES_CONTROL_PLANE_SERVICE_NAME
+              value: "kuma-control-plane"
+            - name: KUMA_RUNTIME_KUBERNETES_INJECTOR_CA_CERT_FILE
+              value: "/var/run/secrets/kuma.io/tls-cert/ca.crt"
+            - name: KUMA_RUNTIME_KUBERNETES_INJECTOR_CNI_ENABLED
+              value: "false"
+            - name: KUMA_RUNTIME_KUBERNETES_INJECTOR_SIDECAR_CONTAINER_IMAGE
+              value: "docker.io/kumahq/kuma-dp:1.4.1"
+            - name: KUMA_RUNTIME_KUBERNETES_SERVICE_ACCOUNT_NAME
+              value: "system:serviceaccount:kuma-system:kuma-control-plane"
+            - name: KUMA_STORE_KUBERNETES_SYSTEM_NAMESPACE
+              value: "kuma-system"
+            - name: KUMA_STORE_TYPE
+              value: "kubernetes"
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+          args:
+            - run
+            - --log-level=info
+            - --config-file=/etc/kuma.io/kuma-control-plane/config.yaml
+          ports:
+            - containerPort: 5681
+            - containerPort: 5682
+            - containerPort: 5443
+            - containerPort: 5678
+            - containerPort: 5653
+              protocol: UDP
+          livenessProbe:
+            httpGet:
+              path: /healthy
+              port: 5680
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 5680
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+          volumeMounts:
+            - name: general-tls-cert
+              mountPath: /var/run/secrets/kuma.io/tls-cert
+              readOnly: true
+            - name: kuma-control-plane-config
+              mountPath: /etc/kuma.io/kuma-control-plane
+              readOnly: true
+      volumes:
+        - name: general-tls-cert
+          secret:
+            secretName: kuma-tls-cert
+        - name: kuma-control-plane-config
+          configMap:
+            name: kuma-control-plane-config
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kuma-ingress
+  namespace: kuma-system
+  labels:
+    app.kubernetes.io/name: kuma
+    app.kubernetes.io/instance: kuma
+    app: kuma-ingress
+spec:
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: kuma
+      app.kubernetes.io/instance: kuma
+      app: kuma-ingress
+  template:
+    metadata:
+      annotations:
+        kuma.io/ingress: enabled
+      labels:
+        app.kubernetes.io/name: kuma
+        app.kubernetes.io/instance: kuma
+        app: kuma-ingress
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - kuma-ingress
+              topologyKey: kubernetes.io/hostname
+      serviceAccountName: kuma-ingress
+      nodeSelector:
+      
+        kubernetes.io/arch: amd64
+        kubernetes.io/os: linux
+      containers:
+        - name: ingress
+          image: "docker.io/kumahq/kuma-dp:1.4.1"
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: KUMA_CONTROL_PLANE_URL
+              value: "https://kuma-control-plane.kuma-system:5678"
+            - name: KUMA_CONTROL_PLANE_CA_CERT_FILE
+              value: /var/run/secrets/kuma.io/tls-cert/ca.crt
+            - name: KUMA_DATAPLANE_NAME
+              value: $(POD_NAME).$(POD_NAMESPACE)
+            - name: KUMA_DATAPLANE_ADMIN_PORT
+              value: "9901"
+            - name: KUMA_DATAPLANE_DRAIN_TIME
+              value: 30s
+            - name: KUMA_DATAPLANE_RUNTIME_TOKEN_PATH
+              value: /var/run/secrets/kubernetes.io/serviceaccount/token
+            - name: KUMA_DATAPLANE_PROXY_TYPE
+              value: "ingress"
+          args:
+            - run
+            - --log-level=info
+          ports:
+            - containerPort: 10001
+          livenessProbe:
+            exec:
+              command:
+                - wget
+                - -qO-
+                - http://127.0.0.1:9901
+            failureThreshold: 12
+            initialDelaySeconds: 60
+            periodSeconds: 5
+            successThreshold: 1
+            timeoutSeconds: 3
+          readinessProbe:
+            exec:
+              command:
+                - wget
+                - -qO-
+                - http://127.0.0.1:9901
+            failureThreshold: 12
+            initialDelaySeconds: 1
+            periodSeconds: 5
+            successThreshold: 1
+            timeoutSeconds: 3
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 1000m
+              memory: 512Mi
+          volumeMounts:
+            - name: kuma-tls-cert
+              mountPath: /var/run/secrets/kuma.io/tls-cert
+              readOnly: true
+      volumes:
+        - name: kuma-tls-cert
+          secret:
+            secretName: kuma-tls-cert
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: kuma-admission-mutating-webhook-configuration
+  namespace: kuma-system
+  labels:
+  
+    app.kubernetes.io/name: kuma
+    app.kubernetes.io/instance: kuma
+webhooks:
+  - name: mesh.defaulter.kuma-admission.kuma.io
+    admissionReviewVersions: ["v1"]
+    failurePolicy: Fail
+    clientConfig:
+      caBundle: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUREekNDQWZlZ0F3SUJBZ0lRRklsR2N3OHBLMDQyWktPMUFYdWFXakFOQmdrcWhraUc5dzBCQVFzRkFEQVMKTVJBd0RnWURWUVFERXdkcmRXMWhMV05oTUI0WERUSXlNREV5T1RJek1qQXlOMW9YRFRNeU1ERXlOekl6TWpBeQpOMW93RWpFUU1BNEdBMVVFQXhNSGEzVnRZUzFqWVRDQ0FTSXdEUVlKS29aSWh2Y05BUUVCQlFBRGdnRVBBRENDCkFRb0NnZ0VCQU1KZElWelhtSDk5SGt0ZDZtYkVnS3FhM3NVOVR6RnFkSkVsYkFlUW9UZERlRmJZT2lpOWxJUE8KYm82TXhYaGpBSUN2NGJZMlJpeDVsZ29XSXQ2UHVDRVhaWUFvdDA4RGo5amVQN096WlAxWGliOEdxQnBldUl6dwpYYWc2MFNMTVNoUDFnSFlyOFd3bzBhaDZKTmRsaXN2VjVMQXljbDFwMWJOc1g2N0ROMTl2MkxGVURncTFmbW5yCjZxT2xhMmhoaUVrWmJjY1Z2TGQ4ODN1YlFrMFYzTTMvQkFmMnFlR1hBOGhad1V2L2M0OTBuTGZDUmQ3eWREa1cKU0pWQnUwQkoxd3BVWkVFTTIvYk1VVHNINW8vejBQOFhhYlc2cWJoYWxrais2T2xOd3Y4ZE5CNlUzMzR3a3EvdgpnS1NEZHFZOGtYQmN6cVprT3JnSnRTanU5NStIb0MwQ0F3RUFBYU5oTUY4d0RnWURWUjBQQVFIL0JBUURBZ0trCk1CMEdBMVVkSlFRV01CUUdDQ3NHQVFVRkJ3TUJCZ2dyQmdFRkJRY0RBakFQQmdOVkhSTUJBZjhFQlRBREFRSC8KTUIwR0ExVWREZ1FXQkJTdmVVUWhXaGF1QjRQZTFDdS9VMWVEN1kvc1BqQU5CZ2txaGtpRzl3MEJBUXNGQUFPQwpBUUVBd2loUkxhL1hDV2VxZVlhRlMvd3AyTllkSzNIK2M3bkl1aUVPTW11enJkY00xQk9sTlJwM21uSEhhdGV2ClhTWnZCVXc5K1NVYmpJQXNHNGxCcnR3WHZMV3ZlK1dabW4rRDlraUs5bjE5Q2ZGclVTOWIzN1VabkVqZ3F0TXAKaEN2SVpPTlZNREZqd01DVGIycXM1TzczL2VlNWRIYThoZEJwNTBXUVhSMjc0TGJMZE5vNTdoSmhuclpFZXVGVQo5eXhha2NxUEhDUURPaVhnSGRtcHo2WXFzUDZnb1l4c0VaSGM4d3luQWxlQ3RoNjZnS3pkU3RkYjdlRU94Mk9QCi9rQ0hjWEQ4bkRZUmFOMm80KzNsKzRqOGJ2djREa0xxTTlhY0M4QTExTnRaRTRVM256ajlKVWRHbG5EUmgvYmMKdlMrWnRPeTYwb3hZb08wNHoySkhCcmNZVEE9PQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg==
+      service:
+        namespace: kuma-system
+        name: kuma-control-plane
+        path: /default-kuma-io-v1alpha1-mesh
+    rules:
+      - apiGroups:
+          - kuma.io
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - meshes
+    sideEffects: None
+  - name: owner-reference.kuma-admission.kuma.io
+    admissionReviewVersions: ["v1"]
+    failurePolicy: Fail
+    clientConfig:
+      caBundle: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUREekNDQWZlZ0F3SUJBZ0lRRklsR2N3OHBLMDQyWktPMUFYdWFXakFOQmdrcWhraUc5dzBCQVFzRkFEQVMKTVJBd0RnWURWUVFERXdkcmRXMWhMV05oTUI0WERUSXlNREV5T1RJek1qQXlOMW9YRFRNeU1ERXlOekl6TWpBeQpOMW93RWpFUU1BNEdBMVVFQXhNSGEzVnRZUzFqWVRDQ0FTSXdEUVlKS29aSWh2Y05BUUVCQlFBRGdnRVBBRENDCkFRb0NnZ0VCQU1KZElWelhtSDk5SGt0ZDZtYkVnS3FhM3NVOVR6RnFkSkVsYkFlUW9UZERlRmJZT2lpOWxJUE8KYm82TXhYaGpBSUN2NGJZMlJpeDVsZ29XSXQ2UHVDRVhaWUFvdDA4RGo5amVQN096WlAxWGliOEdxQnBldUl6dwpYYWc2MFNMTVNoUDFnSFlyOFd3bzBhaDZKTmRsaXN2VjVMQXljbDFwMWJOc1g2N0ROMTl2MkxGVURncTFmbW5yCjZxT2xhMmhoaUVrWmJjY1Z2TGQ4ODN1YlFrMFYzTTMvQkFmMnFlR1hBOGhad1V2L2M0OTBuTGZDUmQ3eWREa1cKU0pWQnUwQkoxd3BVWkVFTTIvYk1VVHNINW8vejBQOFhhYlc2cWJoYWxrais2T2xOd3Y4ZE5CNlUzMzR3a3EvdgpnS1NEZHFZOGtYQmN6cVprT3JnSnRTanU5NStIb0MwQ0F3RUFBYU5oTUY4d0RnWURWUjBQQVFIL0JBUURBZ0trCk1CMEdBMVVkSlFRV01CUUdDQ3NHQVFVRkJ3TUJCZ2dyQmdFRkJRY0RBakFQQmdOVkhSTUJBZjhFQlRBREFRSC8KTUIwR0ExVWREZ1FXQkJTdmVVUWhXaGF1QjRQZTFDdS9VMWVEN1kvc1BqQU5CZ2txaGtpRzl3MEJBUXNGQUFPQwpBUUVBd2loUkxhL1hDV2VxZVlhRlMvd3AyTllkSzNIK2M3bkl1aUVPTW11enJkY00xQk9sTlJwM21uSEhhdGV2ClhTWnZCVXc5K1NVYmpJQXNHNGxCcnR3WHZMV3ZlK1dabW4rRDlraUs5bjE5Q2ZGclVTOWIzN1VabkVqZ3F0TXAKaEN2SVpPTlZNREZqd01DVGIycXM1TzczL2VlNWRIYThoZEJwNTBXUVhSMjc0TGJMZE5vNTdoSmhuclpFZXVGVQo5eXhha2NxUEhDUURPaVhnSGRtcHo2WXFzUDZnb1l4c0VaSGM4d3luQWxlQ3RoNjZnS3pkU3RkYjdlRU94Mk9QCi9rQ0hjWEQ4bkRZUmFOMm80KzNsKzRqOGJ2djREa0xxTTlhY0M4QTExTnRaRTRVM256ajlKVWRHbG5EUmgvYmMKdlMrWnRPeTYwb3hZb08wNHoySkhCcmNZVEE9PQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg==
+      service:
+        namespace: kuma-system
+        name: kuma-control-plane
+        path: /owner-reference-kuma-io-v1alpha1
+    rules:
+      - apiGroups:
+          - kuma.io
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+        resources:
+          - circuitbreakers
+          - externalservices
+          - faultinjections
+          - healthchecks
+          - retries
+          - proxytemplates
+          - ratelimits
+          - trafficlogs
+          - trafficpermissions
+          - trafficroutes
+          - traffictraces
+          - virtualoutbounds
+    
+      
+    sideEffects: None
+  - name: namespace-kuma-injector.kuma.io
+    admissionReviewVersions: ["v1"]
+    failurePolicy: Fail
+    namespaceSelector:
+      matchLabels:
+        kuma.io/sidecar-injection: enabled
+    clientConfig:
+      caBundle: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUREekNDQWZlZ0F3SUJBZ0lRRklsR2N3OHBLMDQyWktPMUFYdWFXakFOQmdrcWhraUc5dzBCQVFzRkFEQVMKTVJBd0RnWURWUVFERXdkcmRXMWhMV05oTUI0WERUSXlNREV5T1RJek1qQXlOMW9YRFRNeU1ERXlOekl6TWpBeQpOMW93RWpFUU1BNEdBMVVFQXhNSGEzVnRZUzFqWVRDQ0FTSXdEUVlKS29aSWh2Y05BUUVCQlFBRGdnRVBBRENDCkFRb0NnZ0VCQU1KZElWelhtSDk5SGt0ZDZtYkVnS3FhM3NVOVR6RnFkSkVsYkFlUW9UZERlRmJZT2lpOWxJUE8KYm82TXhYaGpBSUN2NGJZMlJpeDVsZ29XSXQ2UHVDRVhaWUFvdDA4RGo5amVQN096WlAxWGliOEdxQnBldUl6dwpYYWc2MFNMTVNoUDFnSFlyOFd3bzBhaDZKTmRsaXN2VjVMQXljbDFwMWJOc1g2N0ROMTl2MkxGVURncTFmbW5yCjZxT2xhMmhoaUVrWmJjY1Z2TGQ4ODN1YlFrMFYzTTMvQkFmMnFlR1hBOGhad1V2L2M0OTBuTGZDUmQ3eWREa1cKU0pWQnUwQkoxd3BVWkVFTTIvYk1VVHNINW8vejBQOFhhYlc2cWJoYWxrais2T2xOd3Y4ZE5CNlUzMzR3a3EvdgpnS1NEZHFZOGtYQmN6cVprT3JnSnRTanU5NStIb0MwQ0F3RUFBYU5oTUY4d0RnWURWUjBQQVFIL0JBUURBZ0trCk1CMEdBMVVkSlFRV01CUUdDQ3NHQVFVRkJ3TUJCZ2dyQmdFRkJRY0RBakFQQmdOVkhSTUJBZjhFQlRBREFRSC8KTUIwR0ExVWREZ1FXQkJTdmVVUWhXaGF1QjRQZTFDdS9VMWVEN1kvc1BqQU5CZ2txaGtpRzl3MEJBUXNGQUFPQwpBUUVBd2loUkxhL1hDV2VxZVlhRlMvd3AyTllkSzNIK2M3bkl1aUVPTW11enJkY00xQk9sTlJwM21uSEhhdGV2ClhTWnZCVXc5K1NVYmpJQXNHNGxCcnR3WHZMV3ZlK1dabW4rRDlraUs5bjE5Q2ZGclVTOWIzN1VabkVqZ3F0TXAKaEN2SVpPTlZNREZqd01DVGIycXM1TzczL2VlNWRIYThoZEJwNTBXUVhSMjc0TGJMZE5vNTdoSmhuclpFZXVGVQo5eXhha2NxUEhDUURPaVhnSGRtcHo2WXFzUDZnb1l4c0VaSGM4d3luQWxlQ3RoNjZnS3pkU3RkYjdlRU94Mk9QCi9rQ0hjWEQ4bkRZUmFOMm80KzNsKzRqOGJ2djREa0xxTTlhY0M4QTExTnRaRTRVM256ajlKVWRHbG5EUmgvYmMKdlMrWnRPeTYwb3hZb08wNHoySkhCcmNZVEE9PQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg==
+      service:
+        namespace: kuma-system
+        name: kuma-control-plane
+        path: /inject-sidecar
+    rules:
+      - apiGroups:
+          - ""
+        apiVersions:
+          - v1
+        operations:
+          - CREATE
+        resources:
+          - pods
+    sideEffects: None
+  - name: pods-kuma-injector.kuma.io
+    admissionReviewVersions: ["v1"]
+    failurePolicy: Fail
+    objectSelector:
+      matchLabels:
+        kuma.io/sidecar-injection: enabled
+    clientConfig:
+      caBundle: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUREekNDQWZlZ0F3SUJBZ0lRRklsR2N3OHBLMDQyWktPMUFYdWFXakFOQmdrcWhraUc5dzBCQVFzRkFEQVMKTVJBd0RnWURWUVFERXdkcmRXMWhMV05oTUI0WERUSXlNREV5T1RJek1qQXlOMW9YRFRNeU1ERXlOekl6TWpBeQpOMW93RWpFUU1BNEdBMVVFQXhNSGEzVnRZUzFqWVRDQ0FTSXdEUVlKS29aSWh2Y05BUUVCQlFBRGdnRVBBRENDCkFRb0NnZ0VCQU1KZElWelhtSDk5SGt0ZDZtYkVnS3FhM3NVOVR6RnFkSkVsYkFlUW9UZERlRmJZT2lpOWxJUE8KYm82TXhYaGpBSUN2NGJZMlJpeDVsZ29XSXQ2UHVDRVhaWUFvdDA4RGo5amVQN096WlAxWGliOEdxQnBldUl6dwpYYWc2MFNMTVNoUDFnSFlyOFd3bzBhaDZKTmRsaXN2VjVMQXljbDFwMWJOc1g2N0ROMTl2MkxGVURncTFmbW5yCjZxT2xhMmhoaUVrWmJjY1Z2TGQ4ODN1YlFrMFYzTTMvQkFmMnFlR1hBOGhad1V2L2M0OTBuTGZDUmQ3eWREa1cKU0pWQnUwQkoxd3BVWkVFTTIvYk1VVHNINW8vejBQOFhhYlc2cWJoYWxrais2T2xOd3Y4ZE5CNlUzMzR3a3EvdgpnS1NEZHFZOGtYQmN6cVprT3JnSnRTanU5NStIb0MwQ0F3RUFBYU5oTUY4d0RnWURWUjBQQVFIL0JBUURBZ0trCk1CMEdBMVVkSlFRV01CUUdDQ3NHQVFVRkJ3TUJCZ2dyQmdFRkJRY0RBakFQQmdOVkhSTUJBZjhFQlRBREFRSC8KTUIwR0ExVWREZ1FXQkJTdmVVUWhXaGF1QjRQZTFDdS9VMWVEN1kvc1BqQU5CZ2txaGtpRzl3MEJBUXNGQUFPQwpBUUVBd2loUkxhL1hDV2VxZVlhRlMvd3AyTllkSzNIK2M3bkl1aUVPTW11enJkY00xQk9sTlJwM21uSEhhdGV2ClhTWnZCVXc5K1NVYmpJQXNHNGxCcnR3WHZMV3ZlK1dabW4rRDlraUs5bjE5Q2ZGclVTOWIzN1VabkVqZ3F0TXAKaEN2SVpPTlZNREZqd01DVGIycXM1TzczL2VlNWRIYThoZEJwNTBXUVhSMjc0TGJMZE5vNTdoSmhuclpFZXVGVQo5eXhha2NxUEhDUURPaVhnSGRtcHo2WXFzUDZnb1l4c0VaSGM4d3luQWxlQ3RoNjZnS3pkU3RkYjdlRU94Mk9QCi9rQ0hjWEQ4bkRZUmFOMm80KzNsKzRqOGJ2djREa0xxTTlhY0M4QTExTnRaRTRVM256ajlKVWRHbG5EUmgvYmMKdlMrWnRPeTYwb3hZb08wNHoySkhCcmNZVEE9PQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg==
+      service:
+        namespace: kuma-system
+        name: kuma-control-plane
+        path: /inject-sidecar
+    rules:
+      - apiGroups:
+          - ""
+        apiVersions:
+          - v1
+        operations:
+          - CREATE
+        resources:
+          - pods
+    sideEffects: None
+  - name: kuma-injector.kuma.io
+    admissionReviewVersions: ["v1"]
+    failurePolicy: Ignore 
+    clientConfig:
+      caBundle: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUREekNDQWZlZ0F3SUJBZ0lRRklsR2N3OHBLMDQyWktPMUFYdWFXakFOQmdrcWhraUc5dzBCQVFzRkFEQVMKTVJBd0RnWURWUVFERXdkcmRXMWhMV05oTUI0WERUSXlNREV5T1RJek1qQXlOMW9YRFRNeU1ERXlOekl6TWpBeQpOMW93RWpFUU1BNEdBMVVFQXhNSGEzVnRZUzFqWVRDQ0FTSXdEUVlKS29aSWh2Y05BUUVCQlFBRGdnRVBBRENDCkFRb0NnZ0VCQU1KZElWelhtSDk5SGt0ZDZtYkVnS3FhM3NVOVR6RnFkSkVsYkFlUW9UZERlRmJZT2lpOWxJUE8KYm82TXhYaGpBSUN2NGJZMlJpeDVsZ29XSXQ2UHVDRVhaWUFvdDA4RGo5amVQN096WlAxWGliOEdxQnBldUl6dwpYYWc2MFNMTVNoUDFnSFlyOFd3bzBhaDZKTmRsaXN2VjVMQXljbDFwMWJOc1g2N0ROMTl2MkxGVURncTFmbW5yCjZxT2xhMmhoaUVrWmJjY1Z2TGQ4ODN1YlFrMFYzTTMvQkFmMnFlR1hBOGhad1V2L2M0OTBuTGZDUmQ3eWREa1cKU0pWQnUwQkoxd3BVWkVFTTIvYk1VVHNINW8vejBQOFhhYlc2cWJoYWxrais2T2xOd3Y4ZE5CNlUzMzR3a3EvdgpnS1NEZHFZOGtYQmN6cVprT3JnSnRTanU5NStIb0MwQ0F3RUFBYU5oTUY4d0RnWURWUjBQQVFIL0JBUURBZ0trCk1CMEdBMVVkSlFRV01CUUdDQ3NHQVFVRkJ3TUJCZ2dyQmdFRkJRY0RBakFQQmdOVkhSTUJBZjhFQlRBREFRSC8KTUIwR0ExVWREZ1FXQkJTdmVVUWhXaGF1QjRQZTFDdS9VMWVEN1kvc1BqQU5CZ2txaGtpRzl3MEJBUXNGQUFPQwpBUUVBd2loUkxhL1hDV2VxZVlhRlMvd3AyTllkSzNIK2M3bkl1aUVPTW11enJkY00xQk9sTlJwM21uSEhhdGV2ClhTWnZCVXc5K1NVYmpJQXNHNGxCcnR3WHZMV3ZlK1dabW4rRDlraUs5bjE5Q2ZGclVTOWIzN1VabkVqZ3F0TXAKaEN2SVpPTlZNREZqd01DVGIycXM1TzczL2VlNWRIYThoZEJwNTBXUVhSMjc0TGJMZE5vNTdoSmhuclpFZXVGVQo5eXhha2NxUEhDUURPaVhnSGRtcHo2WXFzUDZnb1l4c0VaSGM4d3luQWxlQ3RoNjZnS3pkU3RkYjdlRU94Mk9QCi9rQ0hjWEQ4bkRZUmFOMm80KzNsKzRqOGJ2djREa0xxTTlhY0M4QTExTnRaRTRVM256ajlKVWRHbG5EUmgvYmMKdlMrWnRPeTYwb3hZb08wNHoySkhCcmNZVEE9PQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg==
+      service:
+        namespace: kuma-system
+        name: kuma-control-plane
+        path: /inject-sidecar
+    rules:
+      - apiGroups:
+          - ""
+        apiVersions:
+          - v1
+        operations:
+          - CREATE
+        resources:
+          - pods
+    sideEffects: None
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: kuma-validating-webhook-configuration
+  namespace: kuma-system
+  labels:
+  
+    app.kubernetes.io/name: kuma
+    app.kubernetes.io/instance: kuma
+webhooks:
+  - name: validator.kuma-admission.kuma.io
+    admissionReviewVersions: ["v1"]
+    failurePolicy: Fail
+    clientConfig:
+      caBundle: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUREekNDQWZlZ0F3SUJBZ0lRRklsR2N3OHBLMDQyWktPMUFYdWFXakFOQmdrcWhraUc5dzBCQVFzRkFEQVMKTVJBd0RnWURWUVFERXdkcmRXMWhMV05oTUI0WERUSXlNREV5T1RJek1qQXlOMW9YRFRNeU1ERXlOekl6TWpBeQpOMW93RWpFUU1BNEdBMVVFQXhNSGEzVnRZUzFqWVRDQ0FTSXdEUVlKS29aSWh2Y05BUUVCQlFBRGdnRVBBRENDCkFRb0NnZ0VCQU1KZElWelhtSDk5SGt0ZDZtYkVnS3FhM3NVOVR6RnFkSkVsYkFlUW9UZERlRmJZT2lpOWxJUE8KYm82TXhYaGpBSUN2NGJZMlJpeDVsZ29XSXQ2UHVDRVhaWUFvdDA4RGo5amVQN096WlAxWGliOEdxQnBldUl6dwpYYWc2MFNMTVNoUDFnSFlyOFd3bzBhaDZKTmRsaXN2VjVMQXljbDFwMWJOc1g2N0ROMTl2MkxGVURncTFmbW5yCjZxT2xhMmhoaUVrWmJjY1Z2TGQ4ODN1YlFrMFYzTTMvQkFmMnFlR1hBOGhad1V2L2M0OTBuTGZDUmQ3eWREa1cKU0pWQnUwQkoxd3BVWkVFTTIvYk1VVHNINW8vejBQOFhhYlc2cWJoYWxrais2T2xOd3Y4ZE5CNlUzMzR3a3EvdgpnS1NEZHFZOGtYQmN6cVprT3JnSnRTanU5NStIb0MwQ0F3RUFBYU5oTUY4d0RnWURWUjBQQVFIL0JBUURBZ0trCk1CMEdBMVVkSlFRV01CUUdDQ3NHQVFVRkJ3TUJCZ2dyQmdFRkJRY0RBakFQQmdOVkhSTUJBZjhFQlRBREFRSC8KTUIwR0ExVWREZ1FXQkJTdmVVUWhXaGF1QjRQZTFDdS9VMWVEN1kvc1BqQU5CZ2txaGtpRzl3MEJBUXNGQUFPQwpBUUVBd2loUkxhL1hDV2VxZVlhRlMvd3AyTllkSzNIK2M3bkl1aUVPTW11enJkY00xQk9sTlJwM21uSEhhdGV2ClhTWnZCVXc5K1NVYmpJQXNHNGxCcnR3WHZMV3ZlK1dabW4rRDlraUs5bjE5Q2ZGclVTOWIzN1VabkVqZ3F0TXAKaEN2SVpPTlZNREZqd01DVGIycXM1TzczL2VlNWRIYThoZEJwNTBXUVhSMjc0TGJMZE5vNTdoSmhuclpFZXVGVQo5eXhha2NxUEhDUURPaVhnSGRtcHo2WXFzUDZnb1l4c0VaSGM4d3luQWxlQ3RoNjZnS3pkU3RkYjdlRU94Mk9QCi9rQ0hjWEQ4bkRZUmFOMm80KzNsKzRqOGJ2djREa0xxTTlhY0M4QTExTnRaRTRVM256ajlKVWRHbG5EUmgvYmMKdlMrWnRPeTYwb3hZb08wNHoySkhCcmNZVEE9PQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg==
+      service:
+        namespace: kuma-system
+        name: kuma-control-plane
+        path: /validate-kuma-io-v1alpha1
+    rules:
+      - apiGroups:
+          - kuma.io
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+          - DELETE
+        resources:
+          - circuitbreakers
+          - dataplanes
+          - externalservices
+          - faultinjections
+          - healthchecks
+          - retries
+          - meshes
+          - proxytemplates
+          - ratelimits
+          - trafficlogs
+          - trafficpermissions
+          - trafficroutes
+          - traffictraces
+          - virtualoutbounds
+          - zones
+    
+      
+    sideEffects: None
+  - name: service.validator.kuma-admission.kuma.io
+    admissionReviewVersions: ["v1"]
+    failurePolicy: Ignore
+    clientConfig:
+      caBundle: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUREekNDQWZlZ0F3SUJBZ0lRRklsR2N3OHBLMDQyWktPMUFYdWFXakFOQmdrcWhraUc5dzBCQVFzRkFEQVMKTVJBd0RnWURWUVFERXdkcmRXMWhMV05oTUI0WERUSXlNREV5T1RJek1qQXlOMW9YRFRNeU1ERXlOekl6TWpBeQpOMW93RWpFUU1BNEdBMVVFQXhNSGEzVnRZUzFqWVRDQ0FTSXdEUVlKS29aSWh2Y05BUUVCQlFBRGdnRVBBRENDCkFRb0NnZ0VCQU1KZElWelhtSDk5SGt0ZDZtYkVnS3FhM3NVOVR6RnFkSkVsYkFlUW9UZERlRmJZT2lpOWxJUE8KYm82TXhYaGpBSUN2NGJZMlJpeDVsZ29XSXQ2UHVDRVhaWUFvdDA4RGo5amVQN096WlAxWGliOEdxQnBldUl6dwpYYWc2MFNMTVNoUDFnSFlyOFd3bzBhaDZKTmRsaXN2VjVMQXljbDFwMWJOc1g2N0ROMTl2MkxGVURncTFmbW5yCjZxT2xhMmhoaUVrWmJjY1Z2TGQ4ODN1YlFrMFYzTTMvQkFmMnFlR1hBOGhad1V2L2M0OTBuTGZDUmQ3eWREa1cKU0pWQnUwQkoxd3BVWkVFTTIvYk1VVHNINW8vejBQOFhhYlc2cWJoYWxrais2T2xOd3Y4ZE5CNlUzMzR3a3EvdgpnS1NEZHFZOGtYQmN6cVprT3JnSnRTanU5NStIb0MwQ0F3RUFBYU5oTUY4d0RnWURWUjBQQVFIL0JBUURBZ0trCk1CMEdBMVVkSlFRV01CUUdDQ3NHQVFVRkJ3TUJCZ2dyQmdFRkJRY0RBakFQQmdOVkhSTUJBZjhFQlRBREFRSC8KTUIwR0ExVWREZ1FXQkJTdmVVUWhXaGF1QjRQZTFDdS9VMWVEN1kvc1BqQU5CZ2txaGtpRzl3MEJBUXNGQUFPQwpBUUVBd2loUkxhL1hDV2VxZVlhRlMvd3AyTllkSzNIK2M3bkl1aUVPTW11enJkY00xQk9sTlJwM21uSEhhdGV2ClhTWnZCVXc5K1NVYmpJQXNHNGxCcnR3WHZMV3ZlK1dabW4rRDlraUs5bjE5Q2ZGclVTOWIzN1VabkVqZ3F0TXAKaEN2SVpPTlZNREZqd01DVGIycXM1TzczL2VlNWRIYThoZEJwNTBXUVhSMjc0TGJMZE5vNTdoSmhuclpFZXVGVQo5eXhha2NxUEhDUURPaVhnSGRtcHo2WXFzUDZnb1l4c0VaSGM4d3luQWxlQ3RoNjZnS3pkU3RkYjdlRU94Mk9QCi9rQ0hjWEQ4bkRZUmFOMm80KzNsKzRqOGJ2djREa0xxTTlhY0M4QTExTnRaRTRVM256ajlKVWRHbG5EUmgvYmMKdlMrWnRPeTYwb3hZb08wNHoySkhCcmNZVEE9PQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg==
+      service:
+        namespace: kuma-system
+        name: kuma-control-plane
+        path: /validate-v1-service
+    rules:
+      - apiGroups:
+          - ""
+        apiVersions:
+          - v1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - services
+    sideEffects: None
+  - name: secret.validator.kuma-admission.kuma.io
+    admissionReviewVersions: ["v1"]
+    namespaceSelector:
+      matchLabels:
+        kuma.io/system-namespace: "true"
+    failurePolicy: Ignore
+    clientConfig:
+      caBundle: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUREekNDQWZlZ0F3SUJBZ0lRRklsR2N3OHBLMDQyWktPMUFYdWFXakFOQmdrcWhraUc5dzBCQVFzRkFEQVMKTVJBd0RnWURWUVFERXdkcmRXMWhMV05oTUI0WERUSXlNREV5T1RJek1qQXlOMW9YRFRNeU1ERXlOekl6TWpBeQpOMW93RWpFUU1BNEdBMVVFQXhNSGEzVnRZUzFqWVRDQ0FTSXdEUVlKS29aSWh2Y05BUUVCQlFBRGdnRVBBRENDCkFRb0NnZ0VCQU1KZElWelhtSDk5SGt0ZDZtYkVnS3FhM3NVOVR6RnFkSkVsYkFlUW9UZERlRmJZT2lpOWxJUE8KYm82TXhYaGpBSUN2NGJZMlJpeDVsZ29XSXQ2UHVDRVhaWUFvdDA4RGo5amVQN096WlAxWGliOEdxQnBldUl6dwpYYWc2MFNMTVNoUDFnSFlyOFd3bzBhaDZKTmRsaXN2VjVMQXljbDFwMWJOc1g2N0ROMTl2MkxGVURncTFmbW5yCjZxT2xhMmhoaUVrWmJjY1Z2TGQ4ODN1YlFrMFYzTTMvQkFmMnFlR1hBOGhad1V2L2M0OTBuTGZDUmQ3eWREa1cKU0pWQnUwQkoxd3BVWkVFTTIvYk1VVHNINW8vejBQOFhhYlc2cWJoYWxrais2T2xOd3Y4ZE5CNlUzMzR3a3EvdgpnS1NEZHFZOGtYQmN6cVprT3JnSnRTanU5NStIb0MwQ0F3RUFBYU5oTUY4d0RnWURWUjBQQVFIL0JBUURBZ0trCk1CMEdBMVVkSlFRV01CUUdDQ3NHQVFVRkJ3TUJCZ2dyQmdFRkJRY0RBakFQQmdOVkhSTUJBZjhFQlRBREFRSC8KTUIwR0ExVWREZ1FXQkJTdmVVUWhXaGF1QjRQZTFDdS9VMWVEN1kvc1BqQU5CZ2txaGtpRzl3MEJBUXNGQUFPQwpBUUVBd2loUkxhL1hDV2VxZVlhRlMvd3AyTllkSzNIK2M3bkl1aUVPTW11enJkY00xQk9sTlJwM21uSEhhdGV2ClhTWnZCVXc5K1NVYmpJQXNHNGxCcnR3WHZMV3ZlK1dabW4rRDlraUs5bjE5Q2ZGclVTOWIzN1VabkVqZ3F0TXAKaEN2SVpPTlZNREZqd01DVGIycXM1TzczL2VlNWRIYThoZEJwNTBXUVhSMjc0TGJMZE5vNTdoSmhuclpFZXVGVQo5eXhha2NxUEhDUURPaVhnSGRtcHo2WXFzUDZnb1l4c0VaSGM4d3luQWxlQ3RoNjZnS3pkU3RkYjdlRU94Mk9QCi9rQ0hjWEQ4bkRZUmFOMm80KzNsKzRqOGJ2djREa0xxTTlhY0M4QTExTnRaRTRVM256ajlKVWRHbG5EUmgvYmMKdlMrWnRPeTYwb3hZb08wNHoySkhCcmNZVEE9PQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg==
+      service:
+        namespace: kuma-system
+        name: kuma-control-plane
+        path: /validate-v1-secret
+    rules:
+      - apiGroups:
+          - ""
+        apiVersions:
+          - v1
+        operations:
+          - CREATE
+          - UPDATE
+          - DELETE
+        resources:
+          - secrets
+    sideEffects: None
