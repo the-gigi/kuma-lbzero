@@ -70,12 +70,17 @@ def deploy_kuma_multizone():
     #                       --overwrite""".split())
 
 
-def deploy_social_graph_service():
-    """Deploy the social srvice graph to the remote clusters"""
+def deploy_service(name):
+    """Deploy a service to the remote clusters
+
+    All the service Kubernetes resources (Deployment, Service, ServiceAccount, etc)
+    must be defined in a single file in the `k8s` directory called `<name>.yaml`
+
+    """
     remote_clusters = 'remote-1 remote-2'.split()
     for cluster in remote_clusters:
-        print(f"Deploying the social graph service to '{cluster}'")
-        args = f'--context {config.kube_contexts[cluster]} -f social_graph.yaml'.split()
+        print(f"Deploying the '{name}' service to '{cluster}'")
+        args = f'--context {config.kube_contexts[cluster]} -f k8s/{name}.yaml'.split()
         sh.kubectl.apply(*args)
 
 
@@ -83,8 +88,9 @@ def main():
     logging.basicConfig(level=logging.INFO,
                         format='[%(asctime)s] %(message)s')
 
-    deploy_kuma_multizone()
-    #deploy_social_graph_service()
+    #deploy_kuma_multizone()
+    #deploy_service('social_graph')
+    deploy_service('httpbin')
 
 
 if __name__ == '__main__':
