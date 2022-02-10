@@ -8,3 +8,8 @@ spec:
     backends:
     - name: ca-1
       type: builtin
+  metrics:
+    enabledBackend: prometheus-1
+    backends:
+    - name: prometheus-1
+      type: prometheus

@@ -1,0 +1,18 @@
+apiVersion: kuma.io/v1alpha1
+kind: TrafficRoute
+mesh: default
+metadata:
+  name: least-request
+spec:
+  sources:
+    - match:
+        kuma.io/service: '*'
+  destinations:
+    - match:
+        kuma.io/service: '*'
+  conf:
+    loadBalancer:
+      leastRequest:
+        choiceCount: 3
+    destination:
+      kuma.io/service: '*'

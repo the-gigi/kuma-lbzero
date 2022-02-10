@@ -1,8 +1,18 @@
 # Setup
 
-## Create 3 k3d clusters
+## Create 3 Kubernetes clusters
 - 1 Global control plane cluster
 - 2 remote clusters
+
+Set the following environment variables to point to your
+clusters kube-context:
+
+```
+export KUMA_GLOBAL=<the global cluster's kube-context>
+export KUMA_REMOTE_1=<the remote-1 cluster's kube-context>
+export KUMA_REMOTE_2=<the remote-2 cluster's kube-context>
+```
+
 
 ## Install Kuma in multi-zone configuration 
 
@@ -17,7 +27,7 @@ Make sure the current context is the management cluster.
 connect to the web UI:
 
 ```
-kubectl port-forward --context aks-global-experimental-westus3-001 -n kuma-system svc/kuma-control-plane 5681:5681
+kubectl port-forward --context $KUMA_GLOBAL -n kuma-system svc/kuma-control-plane 5681:5681
 ```
 
 Then browse to http://localhost:5681
@@ -126,7 +136,7 @@ opinion. However, you can use curl if you prefer:
 First zone one.
 
 ```
-kubectl config set-context aks-remote-1-experimental-westus3-001
+kubectl config set-context $KUMA_REMOTE_1
 kubectl port-forward svc/social-graph-manager 9090:9090 
 
 http POST http://localhost:9090/follow followed=gigi-1 follower=gigi-2
@@ -156,7 +166,7 @@ Date: Sun, 06 Feb 2022 02:15:36 GMT
 Now. zone 2 with different followers:
 
 ```
-kubectl config use-context aks-remote-2-experimental-westus3-001
+kubectl config use-context $KUMA_REMOTE_2
 kubectl port-forward -n delinkcious svc/social-graph-manager 9090:9090 
 
 http POST http://localhost:9090/follow followed=gigi-1 follower=gigi-5
@@ -246,6 +256,97 @@ By the magic of core-dns it can be shortened to any of the following:
 The last one - just `social-graph-manager` works as long as there is
 no other `social-graph-manager` service in another namespace.
 
+# Observability
+
+Let's add prometheus and Grafana to the mix. 
+It's super-easy with Kuma. Just run:
+
+```
+kumactl install metrics | kubectl apply -f -
+```
+
+It installs Prometheus and GRafana into the kuma-metrics namespace 
+on the management cluster.
+
+Then we can expose Grafana locally using:
+
+```
+kubectl port-forward --context $KUMA_GLOBAL -n kuma-metrics svc/grafana 3000:80```
+```
+
+Now, browse to http://localhost:3000/dashboards and enter `admin/admin` for username/password. 
+
+There several built-in dashboards you can explore.
+
+# Changing load balancing algorithm
+
+Kuma defines a default routing policy of round robin.
+
+The k8s/traffic_policy file has a different policy that use 
+the least request algorithm. This algorithm is useful when the duration of 
+different requests varies widely. For example, some requests return immediately,
+while other requests can take 30 seconds or several minutes. In these cases, 
+some unfortunate service instance may be hit with multiple long requests
+and exhaust its resources. With the least request algorithm, when a request comes
+in several healthy servers are checked and the one with the least number of active
+requests gets to handle it. 
+
+To apply this policy delete the default traffic routing policy:
+
+```
+kubectl delete trafficroute route-all-default
+```
+
+Then apply the least request policy
+
+```
+kubectl apply -f k8s/traffic_route.yaml
+```
+
+# Adding a health check policy
+
+The least request policy relies on healthy service instances. 
+How does Kuma know if a servie instance is healthy or not. The passive way
+is to discover it when it tries to send a request to unhealthy service instance
+and the request fails and then needs to sent to another instance. Kuma has a 
+CircuitBreaker policy that implements passive health checking.  
+
+But, Kuma also supports active health checks that ping service instances
+periodically and detect out of band if a service instance is healthy or not.
+
+Let's cause the social graph service in th remote-cluster-2 to fail by
+shutting down its DB
+
+```
+$ kubectl scale deploy social-graph-db --replicas 0 -n delinkcious --context $KUMA_REMOTE_2
+deployment.apps/social-graph-db scaled
+```
+
+Now, with no DB requests to the social-graph service in the remote-cluster-2
+return the following error:
+
+```
+curl http://social-graph-manager:9090/followers/gigi-1
+{"followers":{},"err":"read tcp 10.0.128.30:43064-\u003e172.16.62.35:5432: read: connection reset by peer"}
+```
+
+Now, we can add a HealthCheck policy and see how Kuma deals with failure of some of 
+the service instances.
+
+```
+kubectl apply --context $KUMA_GLOBAL -f k8s/health_check.yaml 
+```
+
+# What happens when health check fails
+
+
+
+
+
+
+
+
+
 # Reference
 
 https://konghq.com/blog/zerolb/
@@ -257,3 +358,4 @@ https://kuma.io/docs/1.4.x/deployments/stand-alone/
 https://kuma.io/docs/1.4.x/networking/networking/
 
 https://www.cncf.io/online-programs/multi-cluster-multi-cloud-service-mesh-with-cncfs-kuma-and-envoy/
+https://konghq.com/webinars/success/service-mesh-zerolb/

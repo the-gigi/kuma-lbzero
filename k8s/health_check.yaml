@@ -1,0 +1,23 @@
+apiVersion: kuma.io/v1alpha1
+kind: HealthCheck
+mesh: default
+metadata:
+  name: social-graph-manager
+spec:
+  sources:
+  - match:
+      kuma.io/service: "*"
+  destinations:
+  - match:
+      kuma.io/service: social-graph-manager_delinkcious_svc_9090
+  conf:
+    interval: 5s
+    timeout: 10s
+    unhealthyThreshold: 1
+    healthyThreshold: 1
+    healthyPanicThreshold: 0
+    eventLogPath: "/dev/stdout"
+    alwaysLogHealthCheckFailures: true
+    http:
+      path: /followers/someone
+      expectedStatuses: [200]
