@@ -105,7 +105,7 @@ def main():
     logging.basicConfig(level=logging.INFO,
                         format='[%(asctime)s] %(message)s')
 
-    # deploy_kuma_multizone()
+    deploy_kuma_multizone()
     deploy_service('social_graph')
 
 
