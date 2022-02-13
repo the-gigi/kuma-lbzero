@@ -44,11 +44,11 @@ def deploy_kuma(kube_context, name, mode):
     sh.kubectl.config(['use-context', kube_context])
     logging.info('Installing Kuma on:' + name)
 
-    kds_global_address = get_kds_global_address()
     args = ['control-plane']
     if mode != 'standalone':
         args += ['--mode', mode]
     if mode == 'zone':
+        kds_global_address = get_kds_global_address()
         args += f"""--zone {name}
                     --ingress-enabled
                     --kds-global-address 'grpcs://{kds_global_address}""".split()
