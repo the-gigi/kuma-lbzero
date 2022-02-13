@@ -48,7 +48,7 @@ update the kube_contexts dictionary to point to the kube contexts
 Then run:
 
 ```
-poetry run python kuma_lbzero.py
+poetry run python kuma_zerolb.py
 ```
 
 This will deploy Kuma in a multi-zone configuration into your
