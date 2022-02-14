@@ -12,8 +12,6 @@ export KUMA_GLOBAL=<the global cluster's kube-context>
 export KUMA_REMOTE_1=<the remote-1 cluster's kube-context>
 export KUMA_REMOTE_2=<the remote-2 cluster's kube-context>
 ```
-
-
 ## Install Kuma in multi-zone configuration 
 
 - Install Kuma
@@ -30,7 +28,7 @@ connect to the web UI:
 kubectl port-forward --context $KUMA_GLOBAL -n kuma-system svc/kuma-control-plane 5681:5681
 ```
 
-Then browse to http://localhost:5681
+Then browse to http://localhost:5681/gui
 
 You can also check various REST endpoints like zones:
 

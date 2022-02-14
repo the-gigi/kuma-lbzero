@@ -44,14 +44,14 @@ def deploy_kuma(kube_context, name, mode):
     sh.kubectl.config(['use-context', kube_context])
     logging.info('Installing Kuma on:' + name)
 
+    kds_global_address = get_kds_global_address()
     args = ['control-plane']
     if mode != 'standalone':
         args += ['--mode', mode]
     if mode == 'zone':
-        kds_global_address = get_kds_global_address()
         args += f"""--zone {name}
                     --ingress-enabled
-                    --kds-global-address 'grpcs://{kds_global_address}""".split()
+                    --kds-global-address 'grpcs://{kds_global_address}'""".split()
 
     print(' '.join(args))
     install_kuma_component(*args)
@@ -65,12 +65,6 @@ def deploy_kuma(kube_context, name, mode):
     if mode == 'zone':
         logging.info('Installing Kuma DNS on:' + name)
         install_kuma_component('dns')
-
-    # if mode == 'global':
-    #     sh.kumactl.config(f"""control-planes add
-    #                           --name zerolb-showcase
-    #                           --address http://{kds_global_address}
-    #                           --overwrite""".split())
 
 
 def apply_mesh_policy():
